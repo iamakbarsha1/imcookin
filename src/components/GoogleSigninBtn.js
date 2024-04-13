@@ -7,7 +7,7 @@ const GoogleSigninBtn = () => {
 
   const handleCallbackResponse = (response) => {
     // alert("Hello", response);
-    console.log("Hello", response.credential);
+    console.log("Hello", response);
 
     const decoded = jwtDecode(response.credential);
     console.log(decoded);
