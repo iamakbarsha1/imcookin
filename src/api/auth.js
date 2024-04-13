@@ -1,8 +1,8 @@
 import { APICall } from ".";
 
-export const OAuth_googleSingin = async (data) => {
+export const ax_OAuth_googleSingin = async (data) => {
   try {
-    const res = await APICall.post(`/post/oauth/google`);
+    const res = await APICall.post(`/auth/oauth`, data);
     if (res.status === 200 || res.status === 201) {
       console.log("oauth google: ", res);
       return res.data;
