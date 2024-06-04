@@ -37,7 +37,6 @@ const GoogleSigninBtn = () => {
 
   return (
     <main>
-      <div>GoogleSigninBtn</div>
       <div id="g_id_onload" />
     </main>
   );
