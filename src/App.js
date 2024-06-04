@@ -1,12 +1,13 @@
-import GoogleSigninBtn from "./components/GoogleSigninBtn";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Auth from "./app/auth/Auth";
 
 export default function App() {
   return (
-    <main>
-      <h1 className="text-3xl text-cyan-600 font-bold underline">
-        I'm Cooking!
-      </h1>
-      <GoogleSigninBtn />
-    </main>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/auth" element={<Auth />} />
+        {/* <Route path="/" element={<Home />} /> */}
+      </Routes>
+    </BrowserRouter>
   );
 }
