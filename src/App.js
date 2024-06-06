@@ -1,12 +1,12 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Auth from "./app/auth/Auth";
+import Login from "./app/auth/login/Login";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/auth" element={<Auth />} />
-        {/* <Route path="/" element={<Home />} /> */}
+        <Route path="/auth" element={<Login />} />
+        {/* <Route path="/auth/signup" element={<Login />} /> */}
       </Routes>
     </BrowserRouter>
   );

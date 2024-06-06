@@ -27,6 +27,7 @@ code {
   input {
     @apply px-2 py-1 bg-secondaryDark rounded-md;
   }
+
   .inputCon {
     @apply flex flex-col;
   }
@@ -35,5 +36,9 @@ code {
   }
   .inputTag {
     @apply text-sm border border-borderWhite outline-none focus:border-blue-500;
+  }
+
+  .loadingIcon {
+    @apply animate-spin;
   }
 }
