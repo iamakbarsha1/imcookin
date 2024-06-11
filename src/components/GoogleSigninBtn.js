@@ -1,16 +1,20 @@
 import { jwtDecode } from "jwt-decode";
 import React from "react";
 import { useState, useEffect } from "react";
+import { ax_OAuth_googleSingin } from "../api/auth";
 
 const GoogleSigninBtn = () => {
   const [triggerUseEffect, setUseEffect] = useState(false);
 
-  const handleCallbackResponse = (response) => {
+  const handleCallbackResponse = async (response) => {
     // alert("Hello", response);
     console.log("Hello", response);
 
-    const decoded = jwtDecode(response.credential);
-    console.log(decoded);
+    const ax = await ax_OAuth_googleSingin(response);
+    console.log("ax: ", ax);
+
+    // const decoded = jwtDecode(response.credential);
+    // console.log(decoded);
   };
 
   useEffect(() => {
@@ -33,7 +37,6 @@ const GoogleSigninBtn = () => {
 
   return (
     <main>
-      <div>GoogleSigninBtn</div>
       <div id="g_id_onload" />
     </main>
   );
