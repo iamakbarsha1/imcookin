@@ -92,7 +92,7 @@ const FormPage = () => {
         <GoogleSigninBtn />
         <label className="labelTag mt-2">
           <span className="">New to Imcookin?</span>
-          <a href={linkSignup} className="text-blue-400">
+          <a href={linkSignup} className="text-blue-400 cursor-pointer">
             {" "}
             Create an account
           </a>

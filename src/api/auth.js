@@ -29,3 +29,19 @@ export const ax_login = async (data) => {
     else return null;
   }
 };
+
+export const ax_signup = async (query) => {
+  try {
+    const res = await APICall.post("/auth/signup", query);
+    if (res.status === 200 || res.status === 201) {
+      console.log("singup route: -> " + res);
+      // return res.data;
+      return res;
+    }
+    return null;
+  } catch (e) {
+    console.log("e.response.data -> " + e.response.data);
+    if (e.response.status === 404) return e.response.data;
+    else return null;
+  }
+};
