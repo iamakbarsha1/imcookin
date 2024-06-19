@@ -19,7 +19,10 @@ export const ax_login = async (data) => {
   try {
     const res = await APICall.post("/auth/login", data);
     if (res.status === 200 || res.status === 201) {
-      console.log("login route: -> " + res);
+      console.log("login route: -> " + JSON.stringify(res));
+      // if (res.data.token) {
+      //   document.cookie = `token=${res.data.token}; path=/;`;
+      // }
       return res.data;
     }
     return null;
