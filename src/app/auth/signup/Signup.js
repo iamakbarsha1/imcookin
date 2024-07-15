@@ -4,6 +4,7 @@ import SignupNav from "../../../components/SignupNav";
 import { toFormData } from "axios";
 import { ax_signup } from "../../../api/auth";
 import { debounce } from "../../../utils/debounce";
+import useDebounce from "../../../hooks/useDebounce";
 // import FormPage from "./section/FormPage";
 
 const Signup = () => {
@@ -52,27 +53,28 @@ const Signup = () => {
   const [query, setQuery] = useState("");
   const [currField, setCurrField] = useState("");
 
-  // const query = { email: "", password: "", name: "", username: "" };
-
-  const sendQuery = async (currField) => {
-    const ax = await ax_signup(query);
-    console.log("ax ---> " + JSON.stringify(ax));
+  const sendQuery = async (currField, value) => {
+    try {
+      const ax = await ax_signup({ [currField]: value });
+      console.log("currField " + currField);
+      console.log("query: " + JSON.stringify({ [currField]: value }));
+      console.log("ax - Response: ", JSON.stringify(ax));
+    } catch (error) {
+      console.error("Error: ", JSON.stringify(error));
+    }
   };
 
-  // const debouncedSendQuery = debounce(sendQuery, 300);
-  const debouncedSendQuery = debounce((query) => sendQuery(query), 1000);
-  console.log("debouncedSendQuery " + debouncedSendQuery());
-  // const sendQuery =
+  // Use the custom debounce hook
+  const debouncedSendQuery = useDebounce(sendQuery, 500);
 
   const onHandleChange = (e) => {
     const { name, value } = e.target;
-
-    setCurrField(name); // captures the focused field
 
     setSignupData({
       ...signupData,
       [name]: value,
     });
+    setCurrField(name); // captures the focused field
 
     /**
      * Updates the form array by setting the value of a specific input.
@@ -97,12 +99,15 @@ const Signup = () => {
         return [];
       }
     });
-
-    if (signupData.email !== "" || signupData.username !== "") {
-      debouncedSendQuery(query);
+    console.log("name: " + name);
+    console.log("value: " + value);
+    if (name === "email" || name === "username") {
+      setQuery(value);
+      debouncedSendQuery(name, value);
     }
   };
 
+  console.log("query: " + query);
   /**
    * Handles the click event when the "Continue" button is clicked.
    *
@@ -110,7 +115,7 @@ const Signup = () => {
    * @param {Array} arr - The array of form inputs.
    * @param {number} i - The index of the current form input.
    */
-  const onContinueClick = (e, arr, i) => {
+  const onContinueClick = (e, i) => {
     e.preventDefault();
 
     setFormArr((prevArr) =>
@@ -120,19 +125,17 @@ const Signup = () => {
     );
   };
 
-  useEffect(() => {
-    if (signupData.email !== "" || signupData.username !== "") {
-      if (currField === formArr[0].name && formArr[0].isComplete === true) {
-        setQuery(signupData.email);
-      } else if (
-        currField === formArr[3].name &&
-        formArr[3].isComplete === true
-      ) {
-        setQuery(signupData.username);
-      }
-      console.log("test");
-    }
-  }, [currField, signupData]);
+  // useEffect(() => {
+  //   if (signupData.email !== "" || signupData.username !== "") {
+  //     if (currField === "email" && formArr[0].isComplete) {
+  //       setQuery(signupData.email);
+  //     } else if (currField === "username" && formArr[3].isComplete) {
+  //       setQuery(signupData.username);
+  //     }
+  //     console.log("test");
+  //   }
+  // }, [currField, signupData]);
+  // }, [currField, signupData, formArr]);
 
   // console.log("formArr --> " + JSON.stringify(formArr));
   // console.log("currField --> " + JSON.stringify(currField));
@@ -169,7 +172,7 @@ const Signup = () => {
                     {input.isComplete && (
                       <button
                         className={` py-1 px-3 ml-2 text-sm border border-borderWhite bg-secondaryDark rounded-md shadow-md`}
-                        onClick={(e) => onContinueClick(e, formArr[i + 1], i)}
+                        onClick={(e) => onContinueClick(e, i)}
                         // onClick={(e) => onContinueClick()}
                       >
                         Continue
