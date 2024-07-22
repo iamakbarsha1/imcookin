@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import InputTag from "../../../components/InputTag";
 import SignupNav from "../../../components/SignupNav";
 import { toFormData } from "axios";
-import { ax_signup } from "../../../api/auth";
+import { ax_isEmailUsernameUnique, ax_signup } from "../../../api/auth";
 import { debounce } from "../../../utils/debounce";
 import useDebounce from "../../../hooks/useDebounce";
 // import FormPage from "./section/FormPage";
@@ -55,10 +55,16 @@ const Signup = () => {
 
   const sendQuery = async (currField, value) => {
     try {
-      const ax = await ax_signup({ [currField]: value });
+      // const ax = await ax_signup({ [currField]: value });
+      const ax = await ax_isEmailUsernameUnique({ [currField]: value });
       console.log("currField " + currField);
       console.log("query: " + JSON.stringify({ [currField]: value }));
       console.log("ax - Response: ", JSON.stringify(ax));
+      if (ax.data.code === 201) {
+        setApiResponse(ax.data.description);
+      } else {
+        setApiResponse("");
+      }
     } catch (error) {
       console.error("Error: ", JSON.stringify(error));
     }
@@ -158,25 +164,32 @@ const Signup = () => {
             <form className="mt-5">
               {formArr.map((input, i) => {
                 return input.isNext ? (
-                  <main className="flex items-end" key={input.name}>
-                    <section className="mt-3 w-full">
-                      <InputTag
-                        label={input.label}
-                        name={input.name}
-                        type={"text"}
-                        value={input.value}
-                        // isMandatory={}
-                        onChange={onHandleChange}
-                      />
+                  <main>
+                    <section className="flex items-end" key={input.name}>
+                      <section className="mt-3 w-full">
+                        <InputTag
+                          label={input.label}
+                          name={input.name}
+                          type={"text"}
+                          value={input.value}
+                          // isMandatory={}
+                          onChange={onHandleChange}
+                        />
+                      </section>
+                      {input.isComplete && (
+                        <button
+                          className={` py-1 px-3 ml-2 text-sm border border-borderWhite bg-secondaryDark rounded-md shadow-md`}
+                          onClick={(e) => onContinueClick(e, i)}
+                          // onClick={(e) => onContinueClick()}
+                        >
+                          Continue
+                        </button>
+                      )}
                     </section>
-                    {input.isComplete && (
-                      <button
-                        className={` py-1 px-3 ml-2 text-sm border border-borderWhite bg-secondaryDark rounded-md shadow-md`}
-                        onClick={(e) => onContinueClick(e, i)}
-                        // onClick={(e) => onContinueClick()}
-                      >
-                        Continue
-                      </button>
+                    {apiResponse !== "" && (
+                      <p className={`mt-1.5 labelTag text-red-500`}>
+                        {apiResponse}
+                      </p>
                     )}
                   </main>
                 ) : null;
