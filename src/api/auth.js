@@ -33,6 +33,22 @@ export const ax_login = async (data) => {
   }
 };
 
+export const ax_isEmailUsernameUnique = async (query) => {
+  try {
+    console.log("query -> " + JSON.stringify(query));
+    const res = await APICall.post("/auth/isEmailUsernameUnique", query);
+    console.log("isEmailUsernameUnique - res : " + JSON.stringify(res));
+    if (res.status === 200 || res.status === 201) {
+      return res;
+    }
+    return null;
+  } catch (e) {
+    console.log();
+    if (e.response.status === 404) return e.response.data;
+    else return null;
+  }
+};
+
 export const ax_signup = async (query) => {
   try {
     console.log("query -> " + JSON.stringify(query));
