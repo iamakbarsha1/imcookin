@@ -21,6 +21,7 @@ const Signup = () => {
       value: signupData.email,
       isComplete: true,
       isNext: true,
+      isValid: false,
       isMandatory: true,
     },
     {
@@ -29,6 +30,7 @@ const Signup = () => {
       value: signupData.password,
       isComplete: false,
       isNext: false,
+      isValid: false,
       isMandatory: true,
     },
     {
@@ -37,6 +39,7 @@ const Signup = () => {
       value: signupData.name,
       isComplete: false,
       isNext: false,
+      isValid: false,
       isMandatory: true,
     },
     {
@@ -45,25 +48,83 @@ const Signup = () => {
       value: signupData.username,
       isComplete: false,
       isNext: false,
+      isValid: false,
       isMandatory: true,
     },
   ]);
 
-  const [apiResponse, setApiResponse] = useState("");
+  const [apiResponse, setApiResponse] = useState({
+    email: "",
+    username: "",
+  });
   const [query, setQuery] = useState("");
-  const [currField, setCurrField] = useState("");
+  const [currentField, setCurrentField] = useState("");
+  const [valid, setValid] = useState(false);
 
-  const sendQuery = async (currField, value) => {
+  const updateIsValidKey = (i, bool) => {
+    setFormArr((prevArr) =>
+      prevArr.map((input, index) =>
+        index === i ? { ...input, isValid: bool } : input
+      )
+    );
+  };
+
+  const validateFields = (name, value, i) => {
+    console.log("currentField - name " + name);
+    let validPass = true;
+    if (name === "password" && validPass && value.length > 0) {
+      updateIsValidKey(i, true);
+    } else if (name === "name" && value.length > 0) {
+      updateIsValidKey(i, true);
+    } else {
+      updateIsValidKey(i, false);
+    }
+  };
+
+  const sendQuery = async (currField, value, i) => {
     try {
+      console.log("i: " + i);
       // const ax = await ax_signup({ [currField]: value });
       const ax = await ax_isEmailUsernameUnique({ [currField]: value });
       console.log("currField " + currField);
       console.log("query: " + JSON.stringify({ [currField]: value }));
       console.log("ax - Response: ", JSON.stringify(ax));
       if (ax.data.code === 201) {
-        setApiResponse(ax.data.description);
+        // setApiResponse(...apiResponse, { [currField]: ax.data.description });
+        if (ax.data.type === "email") {
+          setApiResponse((prevState) => ({
+            ...prevState,
+            email: ax.data.description,
+          }));
+        } else if (ax.data.type === "username") {
+          setApiResponse((prevState) => ({
+            ...prevState,
+            username: ax.data.description,
+          }));
+        }
+        setValid(false);
+        updateIsValidKey(i, false);
+      } else if (ax.data.code === 200) {
+        setApiResponse((prevState) => ({
+          ...prevState,
+          email: "",
+        }));
+        setApiResponse((prevState) => ({
+          ...prevState,
+          username: "",
+        }));
+        updateIsValidKey(i, true);
       } else {
-        setApiResponse("");
+        setApiResponse((prevState) => ({
+          ...prevState,
+          email: "",
+        }));
+        setApiResponse((prevState) => ({
+          ...prevState,
+          username: "",
+        }));
+        setValid(false);
+        updateIsValidKey(i, false);
       }
     } catch (error) {
       console.error("Error: ", JSON.stringify(error));
@@ -73,14 +134,14 @@ const Signup = () => {
   // Use the custom debounce hook
   const debouncedSendQuery = useDebounce(sendQuery, 500);
 
-  const onHandleChange = (e) => {
+  const onHandleChange = (e, i) => {
     const { name, value } = e.target;
 
     setSignupData({
       ...signupData,
       [name]: value,
     });
-    setCurrField(name); // captures the focused field
+    setCurrentField(name); // captures the focused field
 
     /**
      * Updates the form array by setting the value of a specific input.
@@ -109,11 +170,13 @@ const Signup = () => {
     console.log("value: " + value);
     if (name === "email" || name === "username") {
       setQuery(value);
-      debouncedSendQuery(name, value);
+      debouncedSendQuery(name, value, i);
+    } else {
+      validateFields(name, value, i);
     }
   };
 
-  console.log("query: " + query);
+  console.log("apiResponse: " + JSON.stringify(apiResponse));
   /**
    * Handles the click event when the "Continue" button is clicked.
    *
@@ -124,28 +187,15 @@ const Signup = () => {
   const onContinueClick = (e, i) => {
     e.preventDefault();
 
-    setFormArr((prevArr) =>
-      prevArr.map((input, index) =>
-        index === i + 1 ? { ...input, isNext: true, isComplete: true } : input
-      )
-    );
+    if (formArr[i].isValid) {
+      setFormArr((prevArr) =>
+        prevArr.map((input, index) =>
+          index === i + 1 ? { ...input, isNext: true, isComplete: true } : input
+        )
+      );
+    }
   };
-
-  // useEffect(() => {
-  //   if (signupData.email !== "" || signupData.username !== "") {
-  //     if (currField === "email" && formArr[0].isComplete) {
-  //       setQuery(signupData.email);
-  //     } else if (currField === "username" && formArr[3].isComplete) {
-  //       setQuery(signupData.username);
-  //     }
-  //     console.log("test");
-  //   }
-  // }, [currField, signupData]);
-  // }, [currField, signupData, formArr]);
-
-  // console.log("formArr --> " + JSON.stringify(formArr));
-  // console.log("currField --> " + JSON.stringify(currField));
-  // console.log("query --> " + JSON.stringify(query));
+  console.log("formArr[1].isValid: " + formArr[1].isValid);
 
   return (
     <main className="h-screen max-w-6xl mx-auto">
@@ -160,11 +210,12 @@ const Signup = () => {
             <div className="text-base tracking-wider text-stone-400">
               Let's begin the adventure
             </div>
-            {JSON.stringify(query)}
+            {JSON.stringify(valid)}
             <form className="mt-5">
               {formArr.map((input, i) => {
                 return input.isNext ? (
                   <main>
+                    {`${JSON.stringify(apiResponse)}`}
                     <section className="flex items-end" key={input.name}>
                       <section className="mt-3 w-full">
                         <InputTag
@@ -173,12 +224,14 @@ const Signup = () => {
                           type={"text"}
                           value={input.value}
                           // isMandatory={}
-                          onChange={onHandleChange}
+                          onChange={(e) => onHandleChange(e, i)}
                         />
                       </section>
                       {input.isComplete && (
                         <button
-                          className={` py-1 px-3 ml-2 text-sm border border-borderWhite bg-secondaryDark rounded-md shadow-md`}
+                          className={`${
+                            formArr[i].isValid ? "text-green-500" : "text-white"
+                          } py-1 px-3 ml-2 text-sm border border-borderWhite bg-secondaryDark rounded-md shadow-md`}
                           onClick={(e) => onContinueClick(e, i)}
                           // onClick={(e) => onContinueClick()}
                         >
@@ -186,9 +239,14 @@ const Signup = () => {
                         </button>
                       )}
                     </section>
-                    {apiResponse !== "" && (
+                    {apiResponse !== "" && formArr[i].isValid === false && (
                       <p className={`mt-1.5 labelTag text-red-500`}>
-                        {apiResponse}
+                        {formArr[i].isValid === false &&
+                          formArr[i].name === "email" &&
+                          apiResponse.email}
+                        {formArr[i].isValid === false &&
+                          formArr[i].name === "username" &&
+                          apiResponse.username}
                       </p>
                     )}
                   </main>
